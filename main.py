@@ -7,12 +7,13 @@ from faker import Faker
 from webdriver_manager.chrome import ChromeDriverManager
 from selenium import webdriver
 from bs4 import BeautifulSoup
-
+from prompts import *
 from emails import MAIL_GENERATION_WEIGHTS
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as EC
-
+from selenium.webdriver.common.keys import Keys
+from selenium.webdriver.common.action_chains import ActionChains
 from selenium.common.exceptions import NoSuchElementException
 
 CLOUD_DESCRIPTION = 'Puts script in a \'cloud\' mode where the Chrome GUI is invisible'
@@ -108,7 +109,7 @@ def doReview(driver, fake_identity, center, account_created):
         getMailCode(driver, fake_identity)
         writeReview(driver, fake_identity)
     else:
-        #loginAccount(driver, fake_identity)
+        # loginAccount(driver, fake_identity)
         writeReview(driver, fake_identity)
 
 
@@ -130,6 +131,23 @@ def loginAccount(driver, fake_identity):
 def writeReview(driver, fake_idenity):
     WebDriverWait(driver, 5).until(EC.element_to_be_clickable(
         (By.XPATH, '/html/body/yelp-react-root/div[1]/div[3]/div/div/div[2]/div/div[1]/main/div[2]/div[1]/a'))).click()
+
+    driver.find_element(
+        By.XPATH, '/html/body/yelp-react-root/div[1]/div/div[2]/div/div/main/div/div[2]/form/div[1]/div/div[1]/div[1]/fieldset/ul/li[1]/div[1]/input').click()
+
+    actions = ActionChains(driver) \
+        .key_down(Keys.SPACE)
+
+    actions.perform()
+
+    # driver.find_element(
+    #     '/html/body/yelp-react-root/div[1]/div/div[2]/div/div/main/div/div[2]/form/div[1]/div/div[2]/div/p/').send_keys(random.choice(PROMPTS))
+
+    WebDriverWait(driver, 5).until(EC.visibility_of_element_located(
+        (By. XPATH, '/html/body/yelp-react-root/div[1]/div/div[2]/div/div/main/div/div[2]/form/div[1]/div/div[2]/div/p/span'))).send_keys(random.choice(PROMPTS))
+
+    driver.find_element(
+        By.XPATH, '/html/body/yelp-react-root/div/div/div[2]/div/div/main/div/div[2]/form/div[2]/button').click()
 
 
 def createAccount(driver, fake_identity, center):
@@ -304,8 +322,9 @@ if __name__ == "__main__":
     fake_identity = createFakeIdentity()
 
     fake_identity = createMail(fake_identity)
+
     account_created = False
-    print(fake_identity)
+    # print(fake_identity)
 
     while True:
 
@@ -317,6 +336,7 @@ if __name__ == "__main__":
             c, center['zip'], "\"yelp\"")
 
         page = requests.get(url)
+
         soup = BeautifulSoup(page.text, "html.parser")
 
         for link in soup.find_all('a'):
@@ -333,6 +353,7 @@ if __name__ == "__main__":
 
                     if not account_created:
                         driver = start_driver(url)
+
                     else:
                         driver.get(url)
                     try:
