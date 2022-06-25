@@ -24,13 +24,6 @@ MAILTM_ENABLED = True
 EPILOG = ''
 SCRIPT_DESCRIPTION = ''
 
-FAKE_CLINIC_REVIEW = '''
-Crisis Pregnancy Centers such as this don't provide abortion services or refer to anywhere that does. Although their name and site might make it sound like they will provide ALL choices for a pregnancy; they will only coerce you into keeping the fetus, even if that wouldn't be best for your situation. For full resouces, please visit https://innedana.com or https://www.plannedparenthood.org/.
-'''
-
-user_name = ''
-yelp_password = ''
-
 account_created = False
 
 # Option parsing
@@ -147,7 +140,7 @@ def writeReview(driver, fake_idenity):
         (By. XPATH, '/html/body/yelp-react-root/div[1]/div/div[2]/div/div/main/div/div[2]/form/div[1]/div/div[2]/div/p/span'))).send_keys(random.choice(PROMPTS))
 
     driver.find_element(
-        By.XPATH, '/html/body/yelp-react-root/div/div/div[2]/div/div/main/div/div[2]/form/div[2]/button').click()
+        By.XPATH, '//button[contains(@class, "css-cednmx")]').click()
 
 
 def createAccount(driver, fake_identity, center):
@@ -196,7 +189,12 @@ def createAccount(driver, fake_identity, center):
     # click on sign up button
     driver.find_element(By.ID, 'signup-button').click()
 
-    time.sleep(15)
+    time.sleep(5)
+
+    try:
+        driver.find_element(By.XPATH, '//*[@id="extra-form-save"]').click()
+    except:
+        pass
 
     if check_exists_by_xpath(driver, 'extra-form-save'):
         driver.find_element(By.XPATH, '//*[@id="extra-form-save"]').click()
@@ -353,9 +351,9 @@ if __name__ == "__main__":
 
                     if not account_created:
                         driver = start_driver(url)
-
                     else:
-                        driver.get(url)
+                        driver = driver.get(url)
+
                     try:
                         doReview(driver, fake_identity,
                                  center, account_created)
