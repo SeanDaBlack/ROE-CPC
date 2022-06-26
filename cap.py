@@ -70,13 +70,10 @@ def download_userscript(driver):
 
 def geckodriver(extension_path):
     """Start a Firefox webdriver and return its state."""
-
-    binary = '/usr/bin/firefox'
-
     options = webdriver.FirefoxOptions()  # Options for the GeckoDriver.
     # Set the webdriver language to English (US).
     options.set_preference('intl.accept_languages', 'en,en-US')
-    options.binary = binary
+
     options.add_argument('--headless')
     options.add_argument('--log-level=3')  # Not logs will be displayed.
     options.add_argument('--mute-audio')  # Audio is muted.
