@@ -356,7 +356,7 @@ if __name__ == "__main__":
         for link in soup.find_all('a'):
             if 'https://www.yelp.com/biz/' in link.get('href'):
 
-                print(f"Picked Center: {center}")
+                print(f"Picked Center: {center['name']}")
                 # print(link.get('href').split('&')[0])
                 url = link.get('href').split('=')[1].split('&')[0]
 
@@ -384,4 +384,3 @@ if __name__ == "__main__":
                     updateReviewNumber()
                     center_counter = 0
                     break
-            break
