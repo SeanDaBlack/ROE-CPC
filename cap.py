@@ -6,6 +6,8 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.firefox.service import Service as SG
 from webdriver_manager.firefox import GeckoDriverManager as GDM
 
+import requests
+
 SCRIPT_URL = 'https://greasyfork.org/fr/scripts/445478-hcaptcha-solver'
 
 
@@ -36,6 +38,11 @@ def window_handles(driver, window_number: int) -> None:
         driver.window_handles) > window_number)
     driver.switch_to.window(  # Switch to the asked tab.
         driver.window_handles[window_number])
+
+
+def updateReviewNumber():
+    # send post request to the server with the data
+    requests.post('"https://change-is-brewing.herokuapp.com/roe')
 
 
 def download_userscript(driver):

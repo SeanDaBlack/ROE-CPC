@@ -327,6 +327,7 @@ def createMail(fake_identity):
 
 if __name__ == "__main__":
 
+    total_reviews = 0
     fake_identity = createFakeIdentity()
 
     fake_identity = createMail(fake_identity)
@@ -378,7 +379,9 @@ if __name__ == "__main__":
                         break
                     time.sleep(10)
                     account_created = True
-                    print('Review Posted')
+                    total_reviews += 1
+                    print(f'{total_reviews} Review Posted')
+                    updateReviewNumber()
                     center_counter = 0
                     break
             break
