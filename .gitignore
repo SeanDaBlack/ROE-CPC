@@ -1,0 +1,4 @@
+geckodriver.log
+.vscode
+__pycache__
+hcaptcha.py

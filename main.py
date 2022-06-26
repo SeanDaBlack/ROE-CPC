@@ -5,9 +5,11 @@ import time
 import requests
 from faker import Faker
 from webdriver_manager.chrome import ChromeDriverManager
+from webdriver_manager.firefox import GeckoDriverManager
 from selenium import webdriver
 from bs4 import BeautifulSoup
 from prompts import *
+from cap import *
 from emails import MAIL_GENERATION_WEIGHTS
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.common.by import By
@@ -30,7 +32,7 @@ account_created = False
 parser = argparse.ArgumentParser(SCRIPT_DESCRIPTION, epilog=EPILOG)
 parser.add_argument('--cloud', action='store_true', default=CLOUD_DISABLED,
                     required=False, help=CLOUD_DESCRIPTION, dest='cloud')
-parser.add_argument('--mailtm', action='store_true', default=MAILTM_DISABLED,
+parser.add_argument('--mailtm', action='store_true', default=MAILTM_ENABLED,
                     required=False, dest='mailtm')
 args = parser.parse_args()
 
@@ -40,7 +42,7 @@ fake = Faker()
 def pickCenter():
 
     # import csv file
-    with open('fake-clinic.csv', 'r') as csvfile:
+    with open('./fake-clinic.csv', 'r') as csvfile:
         # create a csv reader
         reader = csv.reader(csvfile)
         # create a list of rows
@@ -62,31 +64,19 @@ def start_driver(url):
 
     if (args.cloud == CLOUD_ENABLED):
 
-        chrome_options = webdriver.ChromeOptions()
-        chrome_options.add_argument('--headless')
-        chrome_options.add_argument('--no-sandbox')
-        chrome_options.add_argument('--disable-dev-shm-usage')
-        chrome_options.add_argument("--window-size=1920,1080")
-        chrome_options.add_argument('--ignore-certificate-errors')
-        chrome_options.add_argument('--allow-running-insecure-content')
-        user_agent = 'Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/60.0.3112.50 Safari/537.36'
-        chrome_options.add_argument(f'user-agent={user_agent}')
+        driver = geckodriver("./extensions/Tampermonkey.xpi")
 
-        driver = webdriver.Chrome('chromedriver', options=chrome_options)
     else:
         chrome_options = webdriver.ChromeOptions()
         chrome_options.add_argument(
             "--disable-blink-features=AutomationControlled")
-        # chrome_options.add_extension("./extensions/cap.crx")
+        chrome_options.add_extension("./extensions/Tampermonkey.crx")
         driver = webdriver.Chrome(
             ChromeDriverManager().install(), options=chrome_options)
 
-    driver.get(url)
-    # driver.implicitly_wait(10)
-    # WebDriverWait(driver, 10).until(
-    #     expected_conditions.presence_of_element_located((By.XPATH, APPLY_NOW_BUTTON_1)))
+    installCaptcha(driver)
 
-    # time.sleep(1000)
+    driver.get(url)
 
     return driver
 
@@ -122,11 +112,16 @@ def loginAccount(driver, fake_identity):
 
 
 def writeReview(driver, fake_idenity):
-    WebDriverWait(driver, 5).until(EC.element_to_be_clickable(
-        (By.XPATH, '/html/body/yelp-react-root/div[1]/div[3]/div/div/div[2]/div/div[1]/main/div[2]/div[1]/a'))).click()
+
+    # Click on the review button
+    try:
+        WebDriverWait(driver, 5).until(EC.element_to_be_clickable(
+            (By.XPATH, '/html/body/yelp-react-root/div[1]/div[3]/div/div/div[2]/div/div[1]/main/div[2]/div[1]/a'))).click()
+    except:
+        pass
 
     driver.find_element(
-        By.XPATH, '/html/body/yelp-react-root/div[1]/div/div[2]/div/div/main/div/div[2]/form/div[1]/div/div[1]/div[1]/fieldset/ul/li[1]/div[1]/input').click()
+        By.XPATH, "//input[@type='radio']").click()
 
     actions = ActionChains(driver) \
         .key_down(Keys.SPACE)
@@ -189,19 +184,34 @@ def createAccount(driver, fake_identity, center):
     # click on sign up button
     driver.find_element(By.ID, 'signup-button').click()
 
-    time.sleep(5)
-
-    try:
-        driver.find_element(By.XPATH, '//*[@id="extra-form-save"]').click()
-    except:
-        pass
+    time.sleep(1)
 
     if check_exists_by_xpath(driver, 'extra-form-save'):
+        print("No Captcha Present")
         driver.find_element(By.XPATH, '//*[@id="extra-form-save"]').click()
     else:
-        print('Solve Captcha')
+        print("Captcha Present, Solving Captcha")
+
+        # switch to frame
+        # driver.switch_to.frame("0rfap4u3001")
+        driver.switch_to.frame(driver.find_element(
+            by=By.TAG_NAME, value="iframe"))
+
+        time.sleep(1)
+
+        WebDriverWait(driver, 600).until(EC.visibility_of_element_located(
+            (By.CLASS_NAME, 'check')))
+
+        driver.switch_to.default_content()
+
+        # WebDriverWait(driver, 600).until(lambda _: len(visible(
+        #     driver, '//div[@class="h-captcha"]/iframe').get_attribute('data-hcaptcha-response')) > 0)
+
+        print('Captcha Solved')
+
+        driver.find_element(By.ID, 'signup-button').click()
         try:
-            WebDriverWait(driver, 120).until(EC.visibility_of_element_located(
+            WebDriverWait(driver, 180).until(EC.visibility_of_element_located(
                 (By.XPATH, '//*[@id="extra-form-save"]'))).click()
         except:
             raise Exception("Captcha Failed")
@@ -322,12 +332,17 @@ if __name__ == "__main__":
     fake_identity = createMail(fake_identity)
 
     account_created = False
-    # print(fake_identity)
+    center_counter = 0
+    print(fake_identity['email'], fake_identity['password'])
 
     while True:
 
         print("Picking Center")
         center = pickCenter()
+        center_counter += 1
+        if center_counter > 10:
+            print("Request Limit Reached, Please Try Again Later")
+            exit()
         c = center['name'].replace(
             " - ", "-").replace(" ", "+").replace("&", "%26")
         url = 'https://www.google.com/search?q={0}+{1}+{2}'.format(
@@ -338,8 +353,9 @@ if __name__ == "__main__":
         soup = BeautifulSoup(page.text, "html.parser")
 
         for link in soup.find_all('a'):
-
             if 'https://www.yelp.com/biz/' in link.get('href'):
+
+                print(f"Picked Center: {center}")
                 # print(link.get('href').split('&')[0])
                 url = link.get('href').split('=')[1].split('&')[0]
 
@@ -363,3 +379,6 @@ if __name__ == "__main__":
                     time.sleep(10)
                     account_created = True
                     print('Review Posted')
+                    center_counter = 0
+                    break
+            break
