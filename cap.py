@@ -37,12 +37,16 @@ def visible(driver, element: str):
         EC.visibility_of_element_located((By.XPATH, element)))
 
 
-def window_handles(driver, window_number: int) -> None:
-    """Check for window handles and wait until a specific tab is opened."""
-    WDW(driver, 10).until(lambda _: len(
-        driver.window_handles) > window_number)
-    driver.switch_to.window(  # Switch to the asked tab.
-        driver.window_handles[window_number])
+def window_handles(driver, window_number: int):
+
+    try:
+        """Check for window handles and wait until a specific tab is opened."""
+        WDW(driver, 20).until(lambda _: len(
+            driver.window_handles) > window_number)
+        driver.switch_to.window(  # Switch to the asked tab.
+            driver.window_handles[window_number])
+    except:
+        pass
 
 
 def updateReviewNumber():
@@ -79,7 +83,7 @@ def download_clouduserscript(driver):
     # print(original_context)
     try:  # Download and install the userscript.
         print('Adding the hCAPTCHA solver userscript.', end=' ')
-        window_handles(driver, 0)  # Wait that Tampermonkey tab loads.
+        # window_handles(driver, 0)  # Wait that Tampermonkey tab loads.
         driver.get(SCRIPT_URL)  # Go to the userscript URL page.
 
         # Click on the "Install" GreasyFork button.

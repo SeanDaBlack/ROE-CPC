@@ -190,9 +190,28 @@ def createAccount(driver, fake_identity, center):
 
     time.sleep(1)
 
-    if check_exists_by_xpath(driver, 'extra-form-save'):
+    if check_exists_by_xpath(driver, '//*[@id="extra-form-save"]'):
         print("No Captcha Present")
-        driver.find_element(By.XPATH, '//*[@id="extra-form-save"]').click()
+
+        # Scroll into view
+        js = "document.getElementById('extra-form-save')"
+
+        driver.set_window_position(0, 0)
+        driver.set_window_size(1920, 1080)
+
+        driver.execute_script(
+            "document.getElementById('extra-form-save').scrollIntoView(true)")
+        driver.execute_script(
+            "document.getElementById('extra-form-save').click()")
+        try:
+            driver.find_element(
+                By.XPATH, '//*[@id="extra-form-save"]/./..').click()
+        except:
+            driver.find_element(By.CLASS_NAME, 'skip').click()
+
+        time.sleep(3)
+        print(driver.current_url)
+
     else:
         print("Captcha Present, Solving Captcha")
 
@@ -203,14 +222,12 @@ def createAccount(driver, fake_identity, center):
 
         time.sleep(1)
 
-        WebDriverWait(driver, 600).until(EC.visibility_of_element_located(
-            (By.CLASS_NAME, 'check')))
-
-        driver.switch_to.default_content()
+        WebDriverWait(driver, 600).until(
+            EC.presence_of_element_located((By.CLASS_NAME, 'check')))
 
         # WebDriverWait(driver, 600).until(lambda _: len(visible(
         #     driver, '//div[@class="h-captcha"]/iframe').get_attribute('data-hcaptcha-response')) > 0)
-
+        driver.switch_to.default_content()
         print('Captcha Solved')
 
         driver.find_element(By.ID, 'signup-button').click()
@@ -253,11 +270,11 @@ def getMailCode(driver, fake_identity):
             time.sleep(.5)
 
             mail = requests.get("https://api.mail.tm/messages?page=1", headers={
-                'Authorization': f'Bearer {fake_identity.get("sid")}'}).json().get('hydra:member')
-            while not mail:
-                time.sleep(1)
-                mail = requests.get("https://api.mail.tm/messages?page=1", headers={
-                    'Authorization': f'Bearer {fake_identity.get("sid")}'}).json().get('hydra:member')
+                'Authorization': 'Bearer ' + fake_identity['sid']}).json().get('hydra:member')
+            # while not mail:
+            #     time.sleep(1)
+            #     mail = requests.get("https://api.mail.tm/messages?page=1", headers={
+            #         'Authorization': f'Bearer {fake_identity.get("sid")}'}).json().get('hydra:member')
             print("Checking if mail was received...")
             if mail:
 
@@ -332,13 +349,9 @@ def createMail(fake_identity):
 if __name__ == "__main__":
 
     total_reviews = 0
-    fake_identity = createFakeIdentity()
-
-    fake_identity = createMail(fake_identity)
 
     account_created = False
     center_counter = 0
-    print(fake_identity['email'], fake_identity['password'])
 
     while True:
 
@@ -372,6 +385,11 @@ if __name__ == "__main__":
 
                     if not account_created:
                         driver = start_driver(url)
+                        fake_identity = createFakeIdentity()
+
+                        fake_identity = createMail(fake_identity)
+                        print(fake_identity['email'],
+                              fake_identity['password'])
                     else:
                         driver = driver.get(url)
 
