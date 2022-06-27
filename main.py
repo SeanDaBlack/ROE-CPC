@@ -121,11 +121,14 @@ def writeReview(driver, fake_idenity):
     try:
         WebDriverWait(driver, 5).until(EC.element_to_be_clickable(
             (By.XPATH, '/html/body/yelp-react-root/div[1]/div[3]/div/div/div[2]/div/div[1]/main/div[2]/div[1]/a'))).click()
-    except:
+    except Exception as e:
+        print(e)
         pass
 
+    print(driver.current_url)
+
     driver.find_element(
-        By.XPATH, "//input[@type='radio']").click()
+        By.XPATH, '//*[@id="main-content"]/div/div[2]/form/div[1]/div/div[1]/div[1]/fieldset/ul/li[1]/div[1]/input').click()
 
     actions = ActionChains(driver) \
         .key_down(Keys.SPACE)
@@ -196,21 +199,15 @@ def createAccount(driver, fake_identity, center):
         # Scroll into view
         js = "document.getElementById('extra-form-save')"
 
-        driver.set_window_position(0, 0)
-        driver.set_window_size(1920, 1080)
+        driver.get("https://www.yelp.com/" + driver.find_element(By.XPATH,
+                   '//*[@id="extra-form"]/div[3]/div[2]/a').get_attribute('href'))
 
-        driver.execute_script(
-            "document.getElementById('extra-form-save').scrollIntoView(true)")
-        driver.execute_script(
-            "document.getElementById('extra-form-save').click()")
-        try:
-            driver.find_element(
-                By.XPATH, '//*[@id="extra-form-save"]/./..').click()
-        except:
-            driver.find_element(By.CLASS_NAME, 'skip').click()
+        # driver.find_element(By.CLASS_NAME, 'skip').location_once_scrolled_into_view
+        # driver.find_element(By.XPATH, '//*[@id="extra-form"]/div[3]/div[2]/a').click()
 
         time.sleep(3)
-        print(driver.current_url)
+        # print(driver.current_url)
+        print('Confirming Email')
 
     else:
         print("Captcha Present, Solving Captcha")
@@ -227,7 +224,7 @@ def createAccount(driver, fake_identity, center):
 
         # WebDriverWait(driver, 600).until(lambda _: len(visible(
         #     driver, '//div[@class="h-captcha"]/iframe').get_attribute('data-hcaptcha-response')) > 0)
-        driver.switch_to.default_content()
+        # driver.switch_to.default_content()
         print('Captcha Solved')
 
         driver.find_element(By.ID, 'signup-button').click()
@@ -283,7 +280,7 @@ def getMailCode(driver, fake_identity):
                 driver.get((mail[0]['intro'].split('(')[1].split('&')[0]))
 
                 print("Mail received")
-            break
+                break
 
     driver.execute_script("window.history.go(-1)")
 
