@@ -16,6 +16,11 @@ def installCaptcha(driver):
     download_userscript(driver)
 
 
+def installCloudCaptcha(driver):
+    print("Installing captcha script...")
+    download_clouduserscript(driver)
+
+
 def clickable(driver, element: str) -> None:
     """Click on an element if it's clickable using Selenium."""
     try:
@@ -68,12 +73,47 @@ def download_userscript(driver):
         exit()  # Exit the program.
 
 
+def download_clouduserscript(driver):
+    """Download the hCaptcha solver userscript."""
+    original_context = driver.window_handles[0]
+    # print(original_context)
+    try:  # Download and install the userscript.
+        print('Adding the hCAPTCHA solver userscript.', end=' ')
+        window_handles(driver, 0)  # Wait that Tampermonkey tab loads.
+        driver.get(SCRIPT_URL)  # Go to the userscript URL page.
+
+        # Click on the "Install" GreasyFork button.
+        clickable(driver, '//*[@id="install-area"]/a[1]')
+        # Click on "Install" Tampermonkey button.
+        for i in range(len(driver.window_handles)):
+            window_handles(driver, i)  # Switch to the Tampermonkey tab.
+            try:
+                clickable(driver, '//*[@value="Install"]')
+            except:
+                # print('failed')
+                continue
+
+        # window_handles(driver, 2)  # Switch to the GreasyFork tab.
+        # print(driver.window_handles)
+        # driver.close()  # Close the GreasyFork tab.
+        window_handles(driver, 0)  # Switch to main tab.
+
+        # print(driver.window_handles)
+
+        print(f'Installed.')
+    except TE:  # Something went wrong.
+        print(f'Failed.')
+        quit()  # Close the webdriver.
+        exit()  # Exit the program.
+
+
 def geckodriver(extension_path):
-    """Start a Firefox webdriver and return its state."""
+    binary = '/usr/bin/firefox/firefox'
     options = webdriver.FirefoxOptions()  # Options for the GeckoDriver.
     # Set the webdriver language to English (US).
     options.set_preference('intl.accept_languages', 'en,en-US')
-
+    # add binary to options
+    options.binary_location = binary
     options.add_argument('--headless')
     options.add_argument('--log-level=3')  # Not logs will be displayed.
     options.add_argument('--mute-audio')  # Audio is muted.

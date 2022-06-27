@@ -74,7 +74,11 @@ def start_driver(url):
         driver = webdriver.Chrome(
             ChromeDriverManager().install(), options=chrome_options)
 
-    installCaptcha(driver)
+    # if args cloud
+    if (args.cloud == CLOUD_ENABLED):
+        installCloudCaptcha(driver)
+    else:
+        installCaptcha(driver)
 
     driver.get(url)
 
