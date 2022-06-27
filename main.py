@@ -127,13 +127,17 @@ def writeReview(driver, fake_idenity, url):
         print(e)
         pass
 
-    print(driver.current_url)
-    time.sleep(2)
+    # print(driver.current_url)
+    # time.sleep(2)
     try:
-        # WebDriverWait(driver, 8).until(EC.element_to_be_clickable(
-        #     (By.XPATH, "//*[contains(@name,'rating')]"))).click()
-        driver.find_elements(
-            By.XPATH, "//*[contains(@name,'rating')]")[0].click(0)
+        WebDriverWait(driver, 8).until(EC.visibility_of_element_located(
+            (By.XPATH, "//*[contains(@name,'rating')]")))
+        for i in range(len(driver.find_elements(
+                By.XPATH, "//*[contains(@name,'rating')]"))):
+            if i == 0:
+                driver.find_elements(
+                    By.XPATH, "//*[contains(@name,'rating')]")[i].click()
+
     except Exception as e:
         print(e)
         pass
