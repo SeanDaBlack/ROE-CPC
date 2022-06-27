@@ -85,7 +85,7 @@ def start_driver(url):
     return driver
 
 
-def doReview(driver, fake_identity, center, account_created):
+def doReview(driver, fake_identity, center, account_created, place_url):
 
     if not account_created:
 
@@ -94,7 +94,7 @@ def doReview(driver, fake_identity, center, account_created):
         except Exception as e:
             raise e
         getMailCode(driver, fake_identity)
-        writeReview(driver, fake_identity)
+        writeReview(driver, fake_identity, place_url)
     else:
         # loginAccount(driver, fake_identity)
         writeReview(driver, fake_identity)
@@ -115,11 +115,13 @@ def loginAccount(driver, fake_identity):
         By.XPATH, '/html/body/div[2]/div[2]/div/div[4]/div[1]/div/div/div[5]/div[1]/form/button').click()
 
 
-def writeReview(driver, fake_idenity):
+def writeReview(driver, fake_idenity, url):
+
+    driver.get(url)
 
     # Click on the review button
     try:
-        WebDriverWait(driver, 5).until(EC.element_to_be_clickable(
+        WebDriverWait(driver, 8).until(EC.element_to_be_clickable(
             (By.XPATH, '/html/body/yelp-react-root/div[1]/div[3]/div/div/div[2]/div/div[1]/main/div[2]/div[1]/a'))).click()
     except Exception as e:
         print(e)
@@ -127,8 +129,15 @@ def writeReview(driver, fake_idenity):
 
     print(driver.current_url)
 
-    driver.find_element(
-        By.XPATH, '//*[@id="main-content"]/div/div[2]/form/div[1]/div/div[1]/div[1]/fieldset/ul/li[1]/div[1]/input').click()
+    try:
+        WebDriverWait(driver, 8).until(EC.element_to_be_clickable(
+            (By.XPATH, "//*[contains(@name,'rating')"))).click()
+    except Exception as e:
+        print(e)
+        pass
+
+    # driver.find_element(
+    #     By.XPATH, '//*[@id="main-content"]/div/div[2]/form/div[1]/div/div[1]/div[1]/fieldset/ul/li[1]/div[1]/input').click()
 
     actions = ActionChains(driver) \
         .key_down(Keys.SPACE)
@@ -392,7 +401,7 @@ if __name__ == "__main__":
 
                     try:
                         doReview(driver, fake_identity,
-                                 center, account_created)
+                                 center, account_created, url)
                     except Exception as e:
                         print(e)
                         break
