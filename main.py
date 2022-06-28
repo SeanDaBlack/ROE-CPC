@@ -62,31 +62,32 @@ def pickCenter():
 
 def start_driver(url):
 
-    if (args.cloud == CLOUD_ENABLED):
+    # if (args.cloud == CLOUD_ENABLED):
 
-        #driver = geckodriver("./extensions/Tampermonkey.xpi")
-        options = webdriver.ChromeOptions()
-        options.add_argument('--headless')
-        options.add_argument('--no-sandbox')
-        options.add_argument('--disable-dev-shm-usage')
-        # options.add_argument('disable-blink-features=AutomationControlled')
-        #options.headless = True
-        driver = webdriver.Chrome(
-            'chromedriver', options=chrome_options)
+    #driver = geckodriver("./extensions/Tampermonkey.xpi")
+    options = webdriver.ChromeOptions()
+    # options.add_argument('--headless')
+    options.add_argument('--no-sandbox')
+    options.add_argument('--disable-dev-shm-usage')
+    # options.add_argument('disable-blink-features=AutomationControlled')
+    #options.headless = True
+    options.add_argument("window-size=1200x600")
+    # driver = webdriver.Chrome(
+    #     'chromedriver', options=options)
 
-    else:
-        chrome_options = webdriver.ChromeOptions()
-        chrome_options.add_argument(
-            "--disable-blink-features=AutomationControlled")
-        chrome_options.add_extension("./extensions/Tampermonkey.crx")
-        driver = webdriver.Chrome(
-            ChromeDriverManager().install(), options=chrome_options)
+    # else:
+    #     chrome_options = webdriver.ChromeOptions()
+    #     chrome_options.add_argument(
+    #         "--disable-blink-features=AutomationControlled")
+    #     # chrome_options.add_extension("./extensions/Tampermonkey.crx")
+    driver = webdriver.Chrome(
+        ChromeDriverManager().install(), options=options)
 
     # if args cloud
-    if (args.cloud == CLOUD_ENABLED):
-        installCloudCaptcha(driver)
-    else:
-        installCaptcha(driver)
+    # if (args.cloud == CLOUD_ENABLED):
+    # installCloudCaptcha(driver)
+    # else:
+    #     installCaptcha(driver)
 
     driver.get(url)
 
@@ -103,29 +104,110 @@ def doReview(driver, fake_identity, center, account_created, place_url):
             raise e
         getMailCode(driver, fake_identity)
         writeReview(driver, fake_identity, place_url)
-    else:
         # loginAccount(driver, fake_identity)
-        writeReview(driver, fake_identity)
+    else:
+        writeReview(driver, fake_identity, place_url)
+        loginAccount(driver, fake_identity)
 
 
 def loginAccount(driver, fake_identity):
-    # Click Log in button
-    driver.find_element(
-        By.XPATH, '/html/body/yelp-react-root/div[1]/div[2]/header/div/div[1]/div[3]/nav/div/div[2]/div/span[3]/a[1]')
 
-    driver.find_element(By.ID, 'email').send_keys(
+    fake_identity['email'] = "ofkrgtpqiilevzuzqu@kvhrs.com"
+    fake_identity['password'] = 'Pancake10!'
+
+    buttons = driver.find_elements(By.XPATH, "//*[contains(@type,'submit')]")
+
+    for b in buttons:
+        if ("span" in b.get_attribute('innerHTML')) and ("Log" in b.get_attribute('innerHTML')) and ("data" not in b.get_attribute('innerHTML')):
+            print(b.get_attribute('innerHTML'))
+            b.click()
+
+    # buttons[-1].click()
+
+    # for b in buttons:
+    #   print(b.get_attribute('innerHTML'))
+
+    #driver.get('https://www.yelp.com/' + '/login?return_url='+driver.current_url)
+
+    time.sleep(3)
+
+    # print(driver.current_url)
+    # Click Log in button
+    # driver.find_element(
+    #       By.XPATH, '/html/body/yelp-react-root/div[1]/div[2]/header/div/div[1]/div[3]/nav/div/div[2]/div/span[3]/a[1]')
+
+    WebDriverWait(driver, 8).until(EC.presence_of_element_located(
+        (By.XPATH, "//*[contains(@type,'email')]"))).send_keys(
         fake_identity['email'])
-    driver.find_element(By.ID, 'password').send_keys(
+
+    WebDriverWait(driver, 8).until(EC.presence_of_element_located(
+        (By.XPATH, "//*[contains(@type,'password')]"))).send_keys(
         fake_identity['password'])
 
+    # print(driver.page_source)
+
+    print('here')
+    # driver.find_element(By.ID, 'email').send_keys(
+    #       fake_identity['email'])
+    # driver.find_element(By.ID, 'password').send_keys(
+    #       fake_identity['password'])
+
+    buttons = driver.find_elements(By.XPATH, "//*[contains(@type,'submit')]")
+
+    # for b in buttons:
+    #   print(b.get_attribute('innerHTML'))
+    #   #b.click()
+
+    # for b in range(len(buttons)):
+    #   if b == 0:
+    #     #print(buttons[b].get_attribute('innerHTML'))
+    #     if ("span" in buttons[b].get_attribute('innerHTML')) and ("Log in" in buttons[b].get_attribute('innerHTML')):
+    #       print(buttons[b].get_attribute('innerHTML'))
+    #       source_element = buttons[b]
+
+    #       source_element.click()
+
+    s = driver.find_element(
+        By.XPATH, "//*[contains(text(),'Log in')]/..")
+
+    # for source_element in source_elements:
+
+    driver.execute_script(
+        "arguments[0].setAttribute('data-activated',arguments[1])", s, 'true')
+
+    size = s.size
+    w, h = size['width']-1, size['height']-1
+    locString = f'--mousedown-x:{w}px; --mousedown-y:{h}px;'
+    driver.execute_script(
+        "arguments[0].setAttribute('style' ,arguments[1])", s, locString)
+
+    print(s.get_attribute("outerHTML"))
+    # s.click()
+    ActionChains(driver).move_to_element(s).click(s).perform()
+
+    # driver.execute_script('document.getElementsByClassName("css-1enow5j")[document.getElementsByClassName("css-1enow5j").length-2].click()')
+
+    clickable(driver, "//*[contains(text(),'Log in')]")
+
+    #driver.find_element(By.XPATH, '/html/body/yelp-react-root/div/div/div[2]/div/div/main/div/div[2]/div/div/div/div[2]/div/div/div[4]/form/div[5]/button').click()
+
+    print('Logging in')
+
+    # time.sleep(20)
+
+    link = WebDriverWait(driver, 20).until(EC.presence_of_element_located(
+        (By.XPATH, "//*[contains(@aria-label,'Share via link')]")))
+
+    print(link)
+    print(driver.current_url)
+    print(driver.page_source)
+
     # Click Log in button
-    driver.find_element(
-        By.XPATH, '/html/body/div[2]/div[2]/div/div[4]/div[1]/div/div/div[5]/div[1]/form/button').click()
 
 
 def writeReview(driver, fake_idenity, url):
 
-    driver.get(url)
+    # driver.get(url)
 
     # Click on the review button
     try:
@@ -155,54 +237,34 @@ def writeReview(driver, fake_idenity, url):
     # driver.find_element(
     #     By.XPATH, '//*[@id="main-content"]/div/div[2]/form/div[1]/div/div[1]/div[1]/fieldset/ul/li[1]/div[1]/input').click()
 
+    p = random.choice(PROMPTS)
+
     actions = ActionChains(driver)
 
-    actions.key_down(Keys.SPACE).send_keys(random.choice(PROMPTS))
+    actions.key_down(Keys.SPACE).send_keys(p)
 
     actions.perform()
 
+    print(f"Prompt Sent: {p}")
+
     last_height = driver.execute_script("return document.body.scrollHeight")
     driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
-
     source_element = driver.find_element(
         By.XPATH, "//*[contains(text(),'Post Review')]")
+    driver.execute_script(
+        "arguments[0].setAttribute('data-activated',arguments[1])", source_element, 'true')
+
+    time.sleep(5)
+
     ActionChains(driver).move_to_element(source_element).click(driver.find_element(
         By.XPATH, "//*[contains(text(),'Post Review')]")).perform()
 
-    driver.execute_script(
-        "document.getElementsByClassName('css-cednmx')[0].click()")
-
-    clickable(driver, '//*[@value="submit"]')
-
     # driver.find_element(
-    #     '/html/body/yelp-react-root/div[1]/div/div[2]/div/div/main/div/div[2]/form/div[1]/div/div[2]/div/p/').send_keys(random.choice(PROMPTS))
-
-    # print(driver.page_source)
-
-    # driver.find_element(
-    #               By.XPATH, "//*[contains(@role,'textbox')]").send_keys(random.choice(PROMPTS))
-    print("Prompt Sent")
-
-    try:
-        WebDriverWait(driver, 8).until(EC.visibility_of_element_located(
-            (By.XPATH, "//*[contains(text(),'Post Review')]")))
-        for i in range(len(driver.find_elements(
-                By.XPATH, "//*[contains(text(),'Post Review')]"))):
-            if i == 0:
-                driver.find_elements(
-                    By.XPATH, "//*[contains(text(),'Post Review')]")[i].click()
-
-                print('clicked')
-    except Exception as e:
-        print("button not pressed")
-        pass
-
-    # driver.find_element(
-        # By.XPATH, '//button[contains(@class, "css-cednmx")]').click()
+    # By.XPATH, '//button[contains(@class, "css-cednmx")]').click()
     time.sleep(3)
-    print(driver.page_source)
+    print(driver.current_url)
 
-    time.sleep(1000)
+    # time.sleep(1000)
 
     # WebDriverWait(driver, 5).until(EC.visibility_of_element_located(
     #     (By. XPATH, '/html/body/yelp-react-root/div[1]/div/div[2]/div/div/main/div/div[2]/form/div[1]/div/div[2]/div/p/span'))).send_keys(random.choice(PROMPTS))
@@ -262,7 +324,7 @@ def createAccount(driver, fake_identity, center):
         # Scroll into view
         js = "document.getElementById('extra-form-save')"
 
-        driver.get("https://www.yelp.com/" + driver.find_element(By.XPATH,
+        driver.get(driver.find_element(By.XPATH,
                    '//*[@id="extra-form"]/div[3]/div[2]/a').get_attribute('href'))
 
         # driver.find_element(By.CLASS_NAME, 'skip').location_once_scrolled_into_view
