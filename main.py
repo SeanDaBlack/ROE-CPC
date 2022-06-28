@@ -64,7 +64,15 @@ def start_driver(url):
 
     if (args.cloud == CLOUD_ENABLED):
 
-        driver = geckodriver("./extensions/Tampermonkey.xpi")
+        #driver = geckodriver("./extensions/Tampermonkey.xpi")
+        options = webdriver.ChromeOptions()
+        options.add_argument('--headless')
+        options.add_argument('--no-sandbox')
+        options.add_argument('--disable-dev-shm-usage')
+        # options.add_argument('disable-blink-features=AutomationControlled')
+        #options.headless = True
+        driver = webdriver.Chrome(
+            ChromeDriverManager().install(), options=chrome_options)
 
     else:
         chrome_options = webdriver.ChromeOptions()
@@ -127,8 +135,8 @@ def writeReview(driver, fake_idenity, url):
         print(e)
         pass
 
-    # print(driver.current_url)
-    # time.sleep(2)
+    print("review button clicked")
+
     try:
         WebDriverWait(driver, 8).until(EC.visibility_of_element_located(
             (By.XPATH, "//*[contains(@name,'rating')]")))
@@ -142,22 +150,62 @@ def writeReview(driver, fake_idenity, url):
         print(e)
         pass
 
+    print("Star Clicked")
+
     # driver.find_element(
     #     By.XPATH, '//*[@id="main-content"]/div/div[2]/form/div[1]/div/div[1]/div[1]/fieldset/ul/li[1]/div[1]/input').click()
 
-    actions = ActionChains(driver) \
-        .key_down(Keys.SPACE)
+    actions = ActionChains(driver)
+
+    actions.key_down(Keys.SPACE).send_keys(random.choice(PROMPTS))
 
     actions.perform()
+
+    last_height = driver.execute_script("return document.body.scrollHeight")
+    driver.execute_script("window.scrollTo(0, document.body.scrollHeight);")
+
+    source_element = driver.find_element(
+        By.XPATH, "//*[contains(text(),'Post Review')]")
+    ActionChains(driver).move_to_element(source_element).click(driver.find_element(
+        By.XPATH, "//*[contains(text(),'Post Review')]")).perform()
+
+    driver.execute_script(
+        "document.getElementsByClassName('css-cednmx')[0].click()")
+
+    clickable(driver, '//*[@value="submit"]')
 
     # driver.find_element(
     #     '/html/body/yelp-react-root/div[1]/div/div[2]/div/div/main/div/div[2]/form/div[1]/div/div[2]/div/p/').send_keys(random.choice(PROMPTS))
 
-    WebDriverWait(driver, 5).until(EC.visibility_of_element_located(
-        (By. XPATH, '/html/body/yelp-react-root/div[1]/div/div[2]/div/div/main/div/div[2]/form/div[1]/div/div[2]/div/p/span'))).send_keys(random.choice(PROMPTS))
+    # print(driver.page_source)
 
-    driver.find_element(
-        By.XPATH, '//button[contains(@class, "css-cednmx")]').click()
+    # driver.find_element(
+    #               By.XPATH, "//*[contains(@role,'textbox')]").send_keys(random.choice(PROMPTS))
+    print("Prompt Sent")
+
+    try:
+        WebDriverWait(driver, 8).until(EC.visibility_of_element_located(
+            (By.XPATH, "//*[contains(text(),'Post Review')]")))
+        for i in range(len(driver.find_elements(
+                By.XPATH, "//*[contains(text(),'Post Review')]"))):
+            if i == 0:
+                driver.find_elements(
+                    By.XPATH, "//*[contains(text(),'Post Review')]")[i].click()
+
+                print('clicked')
+    except Exception as e:
+        print("button not pressed")
+        pass
+
+    # driver.find_element(
+        # By.XPATH, '//button[contains(@class, "css-cednmx")]').click()
+    time.sleep(3)
+    print(driver.page_source)
+
+    time.sleep(1000)
+
+    # WebDriverWait(driver, 5).until(EC.visibility_of_element_located(
+    #     (By. XPATH, '/html/body/yelp-react-root/div[1]/div/div[2]/div/div/main/div/div[2]/form/div[1]/div/div[2]/div/p/span'))).send_keys(random.choice(PROMPTS))
 
 
 def createAccount(driver, fake_identity, center):
