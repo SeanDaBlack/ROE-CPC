@@ -72,7 +72,7 @@ def start_driver(url):
         # options.add_argument('disable-blink-features=AutomationControlled')
         #options.headless = True
         driver = webdriver.Chrome(
-            ChromeDriverManager().install(), options=chrome_options)
+            'chromedriver', options=chrome_options)
 
     else:
         chrome_options = webdriver.ChromeOptions()
