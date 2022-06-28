@@ -112,6 +112,8 @@ def doReview(driver, fake_identity, center, account_created, place_url):
 
 
 def createAccount(driver, fake_identity, center):
+
+    print("No Account Created: Creating Account")
     # click on sign up button
     WebDriverWait(driver, 5).until(EC.element_to_be_clickable(
         (By.XPATH, '/html/body/yelp-react-root/div[1]/div[2]/header/div/div[1]/div[3]/nav/div/div[2]/div/span[3]/a[2]'))).click()
@@ -128,7 +130,7 @@ def createAccount(driver, fake_identity, center):
         fake_identity['first_name'])
 
    # sleep random amount of time
-    time.sleep(random.randint(0, 1.5))
+    time.sleep(random.randint(0, 1))
 
     # send keys to last name
     driver.find_element(By.ID, 'last_name').send_keys(
@@ -141,7 +143,7 @@ def createAccount(driver, fake_identity, center):
     driver.find_element(By.ID, 'email').send_keys(fake_identity['email'])
 
    # sleep random amount of time
-    time.sleep(random.randint(0, .5))
+    time.sleep(random.randint(0, 1))
 
     # send keys to password
     driver.find_element(By.ID, 'password').send_keys(fake_identity['password'])
@@ -350,7 +352,7 @@ if __name__ == "__main__":
         print("Picking Center")
         center = pickCenter()
         center_counter += 1
-        if center_counter > args.retry_amount:
+        if center_counter > (args.retry_amount):
             print("Request Limit Reached, Please Try Again Later")
             exit()
         c = center['name'].replace(
@@ -365,7 +367,6 @@ if __name__ == "__main__":
         for link in soup.find_all('a'):
             if 'https://www.yelp.com/biz/' in link.get('href'):
 
-                print(f"Picked Center: {center['name']}")
                 # print(link.get('href').split('&')[0])
                 url = link.get('href').split('=')[1].split('&')[0]
 
@@ -376,6 +377,7 @@ if __name__ == "__main__":
                 if "Crisis Pregnancy Centers" in page.text:
 
                     if not account_created:
+                        print(f"Picked Center: {center['name']}")
                         driver = start_driver(url)
                         fake_identity = createFakeIdentity()
 
@@ -383,7 +385,8 @@ if __name__ == "__main__":
                         print(fake_identity['email'],
                               fake_identity['password'])
                     else:
-                        driver = driver.get(url)
+                        print(f"Picked Center: {center['name']}")
+                        driver.get(url)
 
                     try:
                         doReview(driver, fake_identity,
