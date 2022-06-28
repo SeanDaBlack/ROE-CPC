@@ -51,7 +51,7 @@ def window_handles(driver, window_number: int):
 
 def updateReviewNumber():
     # send post request to the server with the data
-    requests.post('"https://change-is-brewing.herokuapp.com/roe')
+    requests.post('https://change-is-brewing.herokuapp.com/roe')
 
 
 def download_userscript(driver):
