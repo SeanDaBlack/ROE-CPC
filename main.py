@@ -77,8 +77,8 @@ def start_driver(url):
             'chromedriver', options=options)
 
     else:
-        chrome_options = webdriver.ChromeOptions()
-        chrome_options.add_argument(
+        options = webdriver.ChromeOptions()
+        options.add_argument(
             "--disable-blink-features=AutomationControlled")
         # chrome_options.add_extension("./extensions/Tampermonkey.crx")
         driver = webdriver.Chrome(
@@ -163,6 +163,10 @@ def createAccount(driver, fake_identity, center):
     # Check if captcha is present
     if check_exists_by_xpath(driver, '//*[@id="extra-form-save"]'):
         print("No Captcha Present")
+
+        time.sleep(3)
+        # print(driver.find_element(By.XPATH,
+        #                           '//*[@id="extra-form"]/div[3]/div[2]/a').get_attribute('href'))
 
         driver.get(driver.find_element(By.XPATH,
                    '//*[@id="extra-form"]/div[3]/div[2]/a').get_attribute('href'))
@@ -320,7 +324,7 @@ def random_email(name=None):
 def updateReviewNumber(fake_identity):
     # send post request to the server with the data to track the number of reviews
     requests.post('https://change-is-brewing.herokuapp.com/roe',
-                  fake_identity, headers={"Content-type: application/json"})
+                  fake_identity)
 
 
 def createMail(fake_identity):
