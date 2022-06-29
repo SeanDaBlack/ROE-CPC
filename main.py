@@ -259,7 +259,7 @@ def writeReview(driver, fake_idenity, url):
     actions.key_down(Keys.SPACE).send_keys(p)
     actions.perform()
 
-    print(f"Prompt Sent: {p}")
+    print(f"Prompt Sent")
 
     # Find Post button
 
@@ -319,7 +319,8 @@ def random_email(name=None):
 
 def updateReviewNumber(fake_identity):
     # send post request to the server with the data to track the number of reviews
-    requests.post('https://change-is-brewing.herokuapp.com/roe', fake_identity)
+    requests.post('https://change-is-brewing.herokuapp.com/roe',
+                  fake_identity, headers={"Content-type: application/json"})
 
 
 def createMail(fake_identity):
