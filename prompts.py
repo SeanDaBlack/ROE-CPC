@@ -7,7 +7,19 @@ PROMPTS = [
     '''PLEASE READ: This is a CPC that spreads MISINFORMATION about abortion and will not provide you with one. The employees here market themselves as people who can give you options for your pregnancy, but they are actually a non-licensed, pro-life staff working to talk you out of an abortion.''',
 
     '''WARNING: This is a conservative Crisis Pregnancy Center. They will not give you an abortion here.''',
-    '''WARNING: This facility does NOT preform abortions nor will they refer you to a doctor that can.''',
+    '''WARNING: This facility does NOT perform abortions nor will they refer you to a doctor that can.''',
+    
+    '''Do NOT come here seeking an abortion. This clinic will go to great lengths to keep you from getting one.''',
+    '''This is not an abortion clinic.''',
+    '''This is a pro life clinic that will stop you from seeking abortion at any cost.''',
+    '''The staff at this clinic cannot and will not provide or discuss abortion.''',
+    '''This is a FAKE clinic funded by pro-life conservatives who want to prevent women from seeking abortion.''',
+    '''They advertise free pregnancy tests, abortion counseling, pre-abortion screenings, abortion education, post-abortion care, etc — but they refuse to help you get an abortion.''',
+    '''This crisis center will lie to women trying to get abortions''',
+    '''This clinic does not perform abortions.''',
+    '''Nobody at this clinic is actually trained to provide abortions. They won't give you one or recommend you to a real doctor.''',
+    '''This facility is a scam. It's fake. They do not provide abortions here.''',
+    
     '''WARNING: This is a conservative CPC that will not provide you with an abortion. If you come here looking for one, their employees will work very hard to dissuade you from getting one.''',
     '''WARNING: This is a Crisis Pregnancy Center. It is a BIASED facility that contains non-licensed employees working to talk you out of abortion and spread misinformation about the procedure.''',
 
