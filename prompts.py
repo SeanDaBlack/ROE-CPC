@@ -18,7 +18,6 @@ PROMPTS = [
     '''This crisis center will lie to women trying to get abortions''',
     '''This clinic does not perform abortions.''',
     '''Nobody at this clinic is actually trained to provide abortions. They won't give you one or recommend you to a real doctor.''',
-    '''This facility is a scam. It's fake. They do not provide abortions here.''',
     
     '''WARNING: This is a conservative CPC that will not provide you with an abortion. If you come here looking for one, their employees will work very hard to dissuade you from getting one.''',
     '''WARNING: This is a Crisis Pregnancy Center. It is a BIASED facility that contains non-licensed employees working to talk you out of abortion and spread misinformation about the procedure.''',
