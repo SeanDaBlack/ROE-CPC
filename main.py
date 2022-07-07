@@ -224,6 +224,30 @@ def getMailCode(driver, fake_identity):
     driver.execute_script("window.history.go(-1)")
 
 
+def checkBlock(driver, url):
+
+    # Click on the review button
+    WebDriverWait(driver, 8).until(EC.element_to_be_clickable(
+        (By.XPATH, '/html/body/yelp-react-root/div[1]/div[3]/div/div/div[2]/div/div[1]/main/div[2]/div[1]/a'))).click()
+
+    time.sleep(2)
+
+    # Check to see if review is blocked
+    try:
+
+        WebDriverWait(driver, 8).until(EC.presence_of_element_located(
+            (By.XPATH, "//*[contains(@role,'presentation')]")))
+
+    except Exception as e:
+
+        # Return to main page
+        driver.get(url)
+        return True
+
+    print("Reviews for this business are blocked; skipping")
+    return False
+
+
 def writeReview(driver, fake_idenity, url):
 
     # Open review page
@@ -352,6 +376,11 @@ if __name__ == "__main__":
     account_created = False
     center_counter = 0
 
+    fake_identity = createFakeIdentity()
+
+    fake_identity = createMail(fake_identity)
+    print(fake_identity['email'],
+          fake_identity['password'])
     while True:
 
         print("Picking Center")
@@ -370,6 +399,7 @@ if __name__ == "__main__":
         soup = BeautifulSoup(page.text, "html.parser")
 
         for link in soup.find_all('a'):
+            # print(link)
             if 'https://www.yelp.com/biz/' in link.get('href'):
 
                 # print(link.get('href').split('&')[0])
@@ -384,14 +414,21 @@ if __name__ == "__main__":
                     if not account_created:
                         print(f"Picked Center: {center['name']}")
                         driver = start_driver(url)
-                        fake_identity = createFakeIdentity()
-
-                        fake_identity = createMail(fake_identity)
-                        print(fake_identity['email'],
-                              fake_identity['password'])
                     else:
                         print(f"Picked Center: {center['name']}")
                         driver.get(url)
+
+                    # Check If Center Is allowing Reviews
+                    print("Checking if Yelp is Allowing Reviews for Center...")
+                    status = checkBlock(driver, url)
+                    if status:
+                        print("Yelp is Allowing Reviews for Center")
+                    else:
+                        print("Yelp is not Allowing Reviews for Center")
+                        if center_counter != 0:
+                            center_counter -= 1
+                        driver.close()
+                        break
 
                     try:
                         doReview(driver, fake_identity,
